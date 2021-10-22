@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>neo_nav2_bringup</name>
+  <version>1.0.0</version>
+  <description>ROS-2 Simulation packages for neobotix robots</description>
+  <maintainer email="padmanabhan@neobotix.de">Padmanabhan Pradheep</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>nav2_common</build_depend>
+  <build_depend>navigation2</build_depend>
+  
+  <exec_depend>navigation2</exec_depend>
+  <exec_depend>nav2_common</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
