@@ -14,7 +14,6 @@ find_package(nav2_lifecycle_manager REQUIRED)
 
 install(DIRECTORY launch
   config
-  maps
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
