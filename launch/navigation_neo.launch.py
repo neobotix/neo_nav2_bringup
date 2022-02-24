@@ -17,7 +17,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable
+from launch.actions import DeclareLaunchArgument, GroupAction, SetEnvironmentVariable, GroupAction
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
@@ -33,6 +33,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
+    use_multi_robots_simulation = LaunchConfiguration('use_multi_robots')
 
     lifecycle_nodes = ['controller_server',
                        'planner_server',
@@ -72,7 +73,12 @@ def generate_launch_description():
         'autostart', default_value='true',
         description='Automatically startup the nav2 stack')
 
+    declare_use_multi_robots_simulation_cmd =  DeclareLaunchArgument(
+        'use_multi_robots', default_value='False',
+        description='A flag to remove the remappings')
+
     load_nodes = GroupAction(
+        condition=IfCondition(PythonExpression(['not ', use_multi_robots_simulation])),
         actions=[
             Node(
                 package='nav2_controller',
@@ -119,6 +125,49 @@ def generate_launch_description():
         ]
     )
 
+    load_nodes_multi_robot = GroupAction(
+        condition=IfCondition(use_multi_robots_simulation),
+        actions=[
+            Node(
+                package='nav2_controller',
+                executable='controller_server',
+                output='screen',
+                parameters=[configured_params]),
+            Node(
+                package='nav2_planner',
+                executable='planner_server',
+                name='planner_server',
+                output='screen',
+                parameters=[configured_params]),
+            Node(
+                package='nav2_recoveries',
+                executable='recoveries_server',
+                name='recoveries_server',
+                output='screen',
+                parameters=[configured_params]),
+            Node(
+                package='nav2_bt_navigator',
+                executable='bt_navigator',
+                name='bt_navigator',
+                output='screen',
+                parameters=[configured_params]),
+            Node(
+                package='nav2_waypoint_follower',
+                executable='waypoint_follower',
+                name='waypoint_follower',
+                output='screen',
+                parameters=[configured_params]),
+            Node(
+                package='nav2_lifecycle_manager',
+                executable='lifecycle_manager',
+                name='lifecycle_manager_navigation',
+                output='screen',
+                parameters=[{'use_sim_time': use_sim_time},
+                            {'autostart': autostart},
+                            {'node_names': lifecycle_nodes}]),
+        ]
+    )
+
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -127,10 +176,10 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)
+    ld.add_action(declare_use_multi_robots_simulation_cmd)
 
     # Add the actions to launch all of the navigation nodes
     ld.add_action(load_nodes)
+    ld.add_action(load_nodes_multi_robot)
 
     return ld
-
-
