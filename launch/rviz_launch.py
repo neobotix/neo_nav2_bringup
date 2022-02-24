@@ -21,7 +21,7 @@ from launch.actions import DeclareLaunchArgument, EmitEvent, RegisterEventHandle
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 from nav2_common.launch import ReplaceString
 
@@ -44,7 +44,7 @@ def generate_launch_description():
 
     declare_use_namespace_cmd = DeclareLaunchArgument(
         'use_namespace',
-        default_value='false',
+        default_value='False',
         description='Whether to apply a namespace to the navigation stack')
 
     declare_rviz_config_file_cmd = DeclareLaunchArgument(
@@ -54,13 +54,26 @@ def generate_launch_description():
 
     namespaced_rviz_config_file = ReplaceString(
             source_file=rviz_config_file,
+            replacements={'<robot_namespace>': ('/', namespace)})
+
+    no_namespaced_rviz_config_file = ReplaceString(
+            source_file=rviz_config_file,
             replacements={'<robot_namespace>': ('', namespace)})
 
     start_namespaced_rviz_cmd = Node(
         package='rviz2',
         executable='rviz2',
+        condition=IfCondition(use_namespace),
         namespace=namespace,
         arguments=['-d', namespaced_rviz_config_file],
+        output='screen',
+        )
+
+    start_rviz_cmd = Node(
+        package='rviz2',
+        executable='rviz2',
+        condition=IfCondition(PythonExpression(['not ', use_namespace])),
+        arguments=['-d', no_namespaced_rviz_config_file],
         output='screen',
         )
 
@@ -79,6 +92,7 @@ def generate_launch_description():
 
     # Add any conditioned actions
     ld.add_action(start_namespaced_rviz_cmd)
+    ld.add_action(start_rviz_cmd)
 
     # Add other nodes and processes we need
     ld.add_action(exit_event_handler_namespaced)
