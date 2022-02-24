@@ -31,7 +31,7 @@ def generate_launch_description():
     autostart = LaunchConfiguration('autostart', default='true')
     use_sim_time = LaunchConfiguration('use_sim_time')    
     lifecycle_nodes = ['map_server', 'amcl']
-    use_multi_robots_simulation = LaunchConfiguration('use_multi_robots', default='false')
+    use_multi_robots_simulation = LaunchConfiguration('use_multi_robots', default='False')
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
