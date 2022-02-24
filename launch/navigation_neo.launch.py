@@ -33,7 +33,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
-    use_multi_robots_simulation = LaunchConfiguration('use_multi_robots', default='false')
+    use_multi_robots_simulation = LaunchConfiguration('use_multi_robots')
 
     lifecycle_nodes = ['controller_server',
                        'planner_server',
@@ -74,7 +74,7 @@ def generate_launch_description():
         description='Automatically startup the nav2 stack')
 
     declare_use_multi_robots_simulation_cmd =  DeclareLaunchArgument(
-        'use_multi_robots', default_value='false',
+        'use_multi_robots', default_value='False',
         description='A flag to remove the remappings')
 
     load_nodes = GroupAction(
@@ -125,7 +125,7 @@ def generate_launch_description():
         ]
     )
 
-    load_nodes = GroupAction(
+    load_nodes_multi_robot = GroupAction(
         condition=IfCondition(use_multi_robots_simulation),
         actions=[
             Node(
@@ -180,7 +180,6 @@ def generate_launch_description():
 
     # Add the actions to launch all of the navigation nodes
     ld.add_action(load_nodes)
+    ld.add_action(load_nodes_multi_robot)
 
     return ld
-
-

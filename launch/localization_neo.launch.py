@@ -76,7 +76,7 @@ def generate_launch_description():
         ]
     )
 
-    load_nodes = GroupAction(
+    load_nodes_multi_robot = GroupAction(
         condition=IfCondition(use_multi_robots_simulation),
         actions=[
         Node(
@@ -101,4 +101,6 @@ def generate_launch_description():
 
     # Declare the launch options
     ld.add_action(load_nodes)
+    ld.add_action(load_nodes_multi_robot)
+
     return ld
