@@ -38,7 +38,7 @@ def generate_launch_description():
     # Declare the launch arguments
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
-        default_value='navigation',
+        default_value='',
         description=('Top-level namespace. The value will be used to replace the '
                      '<robot_namespace> keyword on the rviz config file.'))
 
@@ -54,7 +54,7 @@ def generate_launch_description():
 
     namespaced_rviz_config_file = ReplaceString(
             source_file=rviz_config_file,
-            replacements={'<robot_namespace>': ('/', namespace)})
+            replacements={'<robot_namespace>': ('', namespace)})
 
     start_namespaced_rviz_cmd = Node(
         package='rviz2',
