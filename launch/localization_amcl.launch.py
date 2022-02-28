@@ -29,9 +29,9 @@ def generate_launch_description():
     map_file = LaunchConfiguration('map')
     namespace = LaunchConfiguration('namespace')
     autostart = LaunchConfiguration('autostart', default='true')
-    use_sim_time = LaunchConfiguration('use_sim_time')    
+    use_sim_time = LaunchConfiguration('use_sim_time', default='false')    
     lifecycle_nodes = ['map_server', 'amcl']
-    use_multi_robots_simulation = LaunchConfiguration('use_multi_robots', default='False')
+    use_multi_robots = LaunchConfiguration('use_multi_robots', default='False')
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
@@ -47,7 +47,7 @@ def generate_launch_description():
         convert_types=True)
 
     load_nodes = GroupAction(
-        condition=IfCondition(PythonExpression(['not ', use_multi_robots_simulation])),
+        condition=IfCondition(PythonExpression(['not ', use_multi_robots])),
         actions=[
         Node(
             package='nav2_map_server',
@@ -77,14 +77,8 @@ def generate_launch_description():
     )
 
     load_nodes_multi_robot = GroupAction(
-        condition=IfCondition(use_multi_robots_simulation),
+        condition=IfCondition(use_multi_robots),
         actions=[
-        Node(
-            package='nav2_map_server',
-            executable='map_server',
-            name='map_server',
-            output='screen',
-            parameters=[configured_params]),
         Node(
             package='nav2_amcl',
             executable='amcl',

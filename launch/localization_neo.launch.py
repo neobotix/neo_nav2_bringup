@@ -31,7 +31,7 @@ def generate_launch_description():
     autostart = LaunchConfiguration('autostart', default='true')
     use_sim_time = LaunchConfiguration('use_sim_time')    
     lifecycle_nodes = ['map_server']
-    use_multi_robots_simulation = LaunchConfiguration('use_multi_robots', default='False')
+    use_multi_robots = LaunchConfiguration('use_multi_robots', default='False')
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
@@ -47,7 +47,7 @@ def generate_launch_description():
         convert_types=True)
     
     load_nodes = GroupAction(
-        condition=IfCondition(PythonExpression(['not ', use_multi_robots_simulation])),
+        condition=IfCondition(PythonExpression(['not ', use_multi_robots])),
         actions=[
         Node(
             package='nav2_map_server',
@@ -77,7 +77,7 @@ def generate_launch_description():
     )
 
     load_nodes_multi_robot = GroupAction(
-        condition=IfCondition(use_multi_robots_simulation),
+        condition=IfCondition(use_multi_robots),
         actions=[
         Node(
             package='neo_localization2', 
