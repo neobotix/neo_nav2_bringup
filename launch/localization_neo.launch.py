@@ -85,14 +85,6 @@ def generate_launch_description():
             output='screen',
             name='neo_localization2_node', 
             parameters= [configured_params]),
-        Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            name='lifecycle_manager_localization',
-            output='screen',
-            parameters=[{'use_sim_time': use_sim_time},
-                        {'autostart': autostart},
-                        {'node_names': lifecycle_nodes}])
         ]
     )
 
