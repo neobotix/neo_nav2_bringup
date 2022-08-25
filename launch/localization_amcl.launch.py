@@ -31,6 +31,7 @@ def generate_launch_description():
     autostart = LaunchConfiguration('autostart', default='true')
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')    
     lifecycle_nodes = ['map_server', 'amcl']
+    lifecycle_nodes_multi_robots = ['amcl']
     use_multi_robots = LaunchConfiguration('use_multi_robots', default='False')
 
     remappings = [('/tf', 'tf'),
@@ -92,7 +93,7 @@ def generate_launch_description():
             output='screen',
             parameters=[{'use_sim_time': use_sim_time},
                         {'autostart': autostart},
-                        {'node_names': lifecycle_nodes}])
+                        {'node_names': lifecycle_nodes_multi_robots}])
         ]
     )
 
