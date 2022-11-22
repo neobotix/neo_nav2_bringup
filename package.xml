@@ -3,7 +3,7 @@
 <package format="3">
   <name>neo_nav2_bringup</name>
   <version>1.0.0</version>
-  <description>ROS-2 Simulation packages for neobotix robots</description>
+  <description>ROS-2 navigation bringup packages for neobotix robots</description>
   <maintainer email="padmanabhan@neobotix.de">Padmanabhan Pradheep</maintainer>
   <license>MIT</license>
 
