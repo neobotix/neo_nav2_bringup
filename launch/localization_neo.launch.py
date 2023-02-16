@@ -84,7 +84,6 @@ def generate_launch_description():
             executable='neo_localization_node', 
             output='screen',
             name='neo_localization2_node',
-            remappings=remappings,
             parameters= [configured_params])
         ]
     )
