@@ -61,13 +61,13 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot0/global_costmap/costmap
+        Value: /robot2/global_costmap/costmap
       Update Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot0/global_costmap/costmap_updates
+        Value: /robot2/global_costmap/costmap_updates
       Use Timestamp: false
       Value: true
     - Alpha: 0.699999988079071
@@ -82,13 +82,13 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot0/local_costmap/costmap
+        Value: /robot2/local_costmap/costmap
       Update Topic:
         Depth: 5
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot0/local_costmap/costmap_updates
+        Value: /robot2/local_costmap/costmap_updates
       Use Timestamp: false
       Value: true
     - Alpha: 1
@@ -117,7 +117,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot0/local_plan
+        Value: /robot2/local_plan
       Value: true
     - Alpha: 1
       Buffer Length: 1
@@ -145,7 +145,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot0/plan
+        Value: /robot2/plan
       Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
@@ -157,7 +157,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot_description
+        Value: robot2/robot_description
       Enabled: true
       Links:
         All Links Enabled: true
@@ -228,7 +228,7 @@ Visualization Manager:
         Inertia: false
         Mass: false
       Name: RobotModel
-      TF Prefix: robot0
+      TF Prefix: robot2
       Update Interval: 0
       Value: true
       Visual Enabled: true
@@ -242,7 +242,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot_description
+        Value: robot1/robot_description
       Enabled: true
       Links:
         All Links Enabled: true
@@ -341,7 +341,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot0/local_costmap/published_footprint
+        Value: /robot2/local_costmap/published_footprint
       Value: true
     - Alpha: 1
       Buffer Length: 1
