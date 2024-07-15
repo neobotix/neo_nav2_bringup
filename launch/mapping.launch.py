@@ -22,32 +22,42 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
-MY_NEO_ROBOT = os.environ['MY_ROBOT'] # Set the environment variable in bashrc
-
 def generate_launch_description():
-    use_sim_time = LaunchConfiguration('use_sim_time', default='true') 
-    param_file_name = 'mapping.yaml'
-    param_dir = LaunchConfiguration(
-        'parameters',
-        default=os.path.join(
-            get_package_share_directory('neo_nav2_bringup'),
-            'config/' +
-            param_file_name))
+    ld = LaunchDescription()
 
-    slam_launch_file_dir = os.path.join(get_package_share_directory('slam_toolbox'), 'launch')
+    # Declare launch arguments
 
-    return LaunchDescription([
-        DeclareLaunchArgument(
-            'parameters',
-            default_value=param_dir,
-            description='Full path to param file to load'),
+    use_sim_time_arg = LaunchConfiguration('use_sim_time')
+    param_file_arg = LaunchConfiguration('param_file')
 
-        DeclareLaunchArgument(
+    declare_use_sim_time_arg = DeclareLaunchArgument(
             'use_sim_time',
-            default_value='true',
-            description='Use simulation (Gazebo) clock if true'),
+            default_value='false',
+            description="Use simulation (Gazebo) clock if true"
+        )
 
-        Node(
-            package='slam_toolbox', executable='sync_slam_toolbox_node', output='screen',
-            name='slam_toolbox', parameters = [param_dir])
-    ])
+    declare_param_file_arg = DeclareLaunchArgument(
+            'param_file',
+            default_value=os.path.join(
+                get_package_share_directory('neo_nav2_bringup'),
+                'config',
+                'mapping.yaml'),
+            description='Full path to param file to load'
+        )
+
+    # Node for starting the slam_toolbox
+    start_sync_slam_toolbox_node = Node(
+        parameters=[
+          param_file_arg,
+          {'use_sim_time': use_sim_time_arg}
+        ],
+        package='slam_toolbox',
+        executable='sync_slam_toolbox_node',
+        name='slam_toolbox',
+        output='screen')
+
+    ld.add_action(declare_use_sim_time_arg)
+    ld.add_action(declare_param_file_arg)
+    ld.add_action(start_sync_slam_toolbox_node)
+
+    return ld
