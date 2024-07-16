@@ -8,8 +8,6 @@
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>nav2_common</build_depend>
-  <build_depend>navigation2</build_depend>
   
   <exec_depend>navigation2</exec_depend>
   <exec_depend>nav2_common</exec_depend>
