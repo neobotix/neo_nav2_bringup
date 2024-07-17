@@ -4,8 +4,8 @@
   <name>neo_nav2_bringup</name>
   <version>1.0.2</version>
   <description>ROS-2 navigation bringup packages for neobotix robots</description>
-  <maintainer email="padmanabhan@neobotix.de">Padmanabhan Pradheep</maintainer>
-  <license>MIT</license>
+  <maintainer email="padmanabhan@neobotix.de">Pradheep Padmanabhan</maintainer>
+  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   
