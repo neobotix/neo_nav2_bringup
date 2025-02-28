@@ -5,7 +5,6 @@
   <version>1.0.3</version>
   <description>ROS-2 navigation bringup packages for neobotix robots</description>
   <maintainer email="padmanabhan@neobotix.de">Pradheep Padmanabhan</maintainer>
-  <contributor email="adarshkaran01@gmail.com">Adarsh Karan</contributor>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
