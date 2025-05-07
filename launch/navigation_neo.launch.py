@@ -23,7 +23,7 @@ from launch.actions import DeclareLaunchArgument, GroupAction, GroupAction, Incl
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PythonExpression
-from launch_ros.actions import Node
+from launch_ros.actions import Node, SetParameter
 from launch_ros.descriptions import ParameterFile
 from nav2_common.launch import RewrittenYaml
 
@@ -89,6 +89,7 @@ def generate_launch_description():
     load_nodes = GroupAction(
         condition=IfCondition(PythonExpression(['not ', use_multi_robots])),
         actions=[
+            SetParameter('use_sim_time', use_sim_time),
             Node(
                 package='nav2_controller',
                 executable='controller_server',
@@ -137,6 +138,7 @@ def generate_launch_description():
     load_nodes_multi_robot = GroupAction(
         condition=IfCondition(use_multi_robots),
         actions=[
+            SetParameter('use_sim_time', use_sim_time),
             Node(
                 package='nav2_controller',
                 executable='controller_server',
