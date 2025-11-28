@@ -99,7 +99,7 @@ def generate_launch_description():
         default_value=os.path.join(
             get_package_share_directory('neo_nav2_bringup'),
             'rviz', 
-            'route_server.rviz'),
+            'single_robot.rviz'),
         description='Full path to the RVIZ config file to use')
     
     declare_rviz_output_cmd = DeclareLaunchArgument(
