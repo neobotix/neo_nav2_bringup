@@ -30,7 +30,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     autostart = LaunchConfiguration('autostart', default='true')
     use_sim_time = LaunchConfiguration('use_sim_time')    
-    lifecycle_nodes = ['map_server']
+    lifecycle_nodes = ['map_server', 'neo_localization2_node']
     use_multi_robots = LaunchConfiguration('use_multi_robots', default='False')
 
     remappings = [('/tf', 'tf'),
