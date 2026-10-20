@@ -13,6 +13,11 @@
   <depend>nav2_common</depend>
   <depend>slam_toolbox</depend>
 
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>nav2_simple_commander</exec_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>
