@@ -29,23 +29,27 @@ class RouteNavigator(BasicNavigator):
     def __init__(self):
         super().__init__(node_name='neo_route_node')
         self.declare_parameter('node_ids', [0])
+        self._configured_node_ids = list(self.get_parameter('node_ids').value)
         self._pending_node_ids = None
         self._running = False
         self._route_node_ids = None
         self._next_segment_index = 0
         self._resume_node_id = None
         self._route_request_token = None
+        self._stop_requested = None
         self._start_service = self.create_service(Trigger, '~/start', self._start)
+        self._pause_service = self.create_service(Trigger, '~/pause', self._pause)
         self._resume_service = self.create_service(Trigger, '~/resume', self._resume)
-        self.info('Route following is idle. Set the initial pose in RViz, review node_ids, '
-                  'then call ~/start.')
+        self._cancel_service = self.create_service(Trigger, '~/cancel', self._cancel)
+        self.info(f'Route following is idle with node IDs: {self._configured_node_ids}. '
+                  'Set the initial pose in RViz, then call ~/start.')
 
     def _start(self, request, response):
         if self._running:
             response.message = 'Route following is already running.'
             return response
 
-        node_ids = list(self.get_parameter('node_ids').value)
+        node_ids = list(self._configured_node_ids)
         if len(node_ids) < 2 or any(node_id < 0 or node_id > 65535 for node_id in node_ids):
             response.message = 'node_ids must contain at least two IDs in [0, 65535].'
             return response
@@ -63,6 +67,19 @@ class RouteNavigator(BasicNavigator):
         self._running = True
         response.success = True
         response.message = f'Route following accepted from the beginning for node IDs: {node_ids}'
+        return response
+
+    def _pause(self, request, response):
+        if not self._running:
+            response.message = 'Route following is not running.'
+            return response
+        if self._stop_requested == 'cancel':
+            response.message = 'Route cancellation has already been requested.'
+            return response
+
+        self._stop_requested = 'pause'
+        response.success = True
+        response.message = 'Route pause requested. Call ~/resume after the robot has stopped.'
         return response
 
     def _resume(self, request, response):
@@ -90,6 +107,29 @@ class RouteNavigator(BasicNavigator):
         response.message = f'Route following accepted for remaining node IDs: {remaining}'
         return response
 
+    def _cancel(self, request, response):
+        if self._running:
+            self._stop_requested = 'cancel'
+            response.success = True
+            response.message = 'Route cancellation requested.'
+            return response
+
+        if (self._route_node_ids is not None
+                and self._next_segment_index < len(self._route_node_ids) - 1):
+            self._discard_route()
+            response.success = True
+            response.message = 'Saved route progress was cancelled.'
+            return response
+
+        response.message = 'No active or paused route to cancel.'
+        return response
+
+    def _discard_route(self):
+        self._pending_node_ids = None
+        self._route_node_ids = None
+        self._next_segment_index = 0
+        self._resume_node_id = None
+
     def run_pending_route(self):
         if self._pending_node_ids is None:
             return
@@ -102,8 +142,15 @@ class RouteNavigator(BasicNavigator):
                 end_node = node_ids[index + 1]
                 self.info(f'Following route segment {start_node} -> {end_node}.')
                 if not self._follow_segment(start_node, end_node):
-                    self.warn(f'Route stopped on segment {start_node} -> {end_node}. '
-                              'Call ~/resume to continue or ~/start to restart the full route.')
+                    if self._stop_requested == 'pause':
+                        self.info(f'Route paused on segment {start_node} -> {end_node}. '
+                                  'Call ~/resume to continue or ~/cancel to discard it.')
+                    elif self._stop_requested == 'cancel':
+                        self._discard_route()
+                        self.info('Route cancelled. Call ~/start to begin a new route.')
+                    else:
+                        self.warn(f'Route stopped on segment {start_node} -> {end_node}. '
+                                  'Call ~/resume to continue or ~/start to restart the full route.')
                     return
                 self._next_segment_index = index + 1
                 self._resume_node_id = None
@@ -117,11 +164,16 @@ class RouteNavigator(BasicNavigator):
             except Exception as exc:
                 self.error(f'Failed to cancel remaining navigation tasks: {exc}')
             finally:
+                if self._stop_requested == 'cancel':
+                    self._discard_route()
                 self._running = False
+                self._stop_requested = None
 
     def _follow_segment(self, start_node, end_node):
         route_task = self._request_route(start_node, end_node)
         if route_task is None:
+            return False
+        if self._stop_requested is not None:
             return False
 
         follow_task = RunningTask.NONE
@@ -131,6 +183,9 @@ class RouteNavigator(BasicNavigator):
         controller_result = None
         last_edge = None
         while rclpy.ok():
+            if self._stop_requested is not None:
+                return False
+
             # These navigator calls spin callbacks, including parameter updates
             # and duplicate start requests, outside of the service callback.
             if not route_complete:
@@ -144,6 +199,11 @@ class RouteNavigator(BasicNavigator):
                 controller_complete = self.isTaskComplete(task=follow_task)
                 if controller_complete:
                     controller_result = self.getResult()
+
+            # A stop service callback can run while either completion check spins.
+            # Do not consume feedback or dispatch another controller path afterward.
+            if self._stop_requested is not None:
+                return False
 
             stopped = ((route_complete and route_result != TaskResult.SUCCEEDED)
                        or (controller_complete and controller_result != TaskResult.SUCCEEDED))
@@ -167,6 +227,8 @@ class RouteNavigator(BasicNavigator):
                         path = self._connect_to_route(path)
                         if path is None:
                             return False
+                        if self._stop_requested is not None:
+                            return False
                         # Planning spins callbacks too; do not dispatch motion
                         # if tracking was cancelled while making the connection.
                         if self.isTaskComplete(task=route_task):
@@ -174,9 +236,13 @@ class RouteNavigator(BasicNavigator):
                             route_result = self.getResult()
                             if route_result != TaskResult.SUCCEEDED:
                                 return False
+                        if self._stop_requested is not None:
+                            return False
                     self.info(f'Sending {len(path.poses)} path poses to the controller.')
                     follow_task = self.followPath(path)
                     if follow_task is None:
+                        return False
+                    if self._stop_requested is not None:
                         return False
                     controller_complete = False
                     controller_result = None
