@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(neo_nav2_bringup)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(navigation2 REQUIRED)
 find_package(nav2_map_server REQUIRED)
 find_package(nav2_amcl REQUIRED)
@@ -16,5 +17,11 @@ install(DIRECTORY launch
   config
   rviz
   DESTINATION share/${PROJECT_NAME})
+
+ament_python_install_package(${PROJECT_NAME})
+
+install(PROGRAMS
+  scripts/neo_route.py
+  DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
