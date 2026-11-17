@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [jazzy]
+  pull_request:
+    branches: [jazzy]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    container: ros:jazzy-ros-base
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: src/neo_nav2_bringup
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          rosdep update --rosdistro jazzy
+          rosdep install --from-paths src --ignore-src -y
+
+      - name: Validate config files
+        run: |
+          for f in src/neo_nav2_bringup/config/*.yaml; do
+            python3 -c "import sys, yaml; yaml.safe_load(open(sys.argv[1]))" "$f"
+            echo "ok: $f"
+          done
+
+      - name: Build
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --event-handlers console_cohesion+
+
+      - name: Load every launch file
+        run: |
+          source install/setup.bash
+          for f in install/neo_nav2_bringup/share/neo_nav2_bringup/launch/*.py; do
+            echo "::group::$(basename "$f")"
+            ros2 launch neo_nav2_bringup "$(basename "$f")" --show-args
+            echo "::endgroup::"
+          done
+
+      - name: Test
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon test --event-handlers console_cohesion+
+          colcon test-result --verbose
